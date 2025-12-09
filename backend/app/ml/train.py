@@ -2,11 +2,15 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from joblib import dump
+from joblib import dump, load as joblib_load
+import json
 
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
@@ -29,7 +33,9 @@ try:
 except Exception:
     xgb_available = False
 
-from ...config import ARTIFACTS_DIR, MODEL_PATH
+from ..config import ARTIFACTS_DIR, MODEL_PATH
+
+METRICS_CACHE_PATH = os.path.join(ARTIFACTS_DIR, "metrics_cache.json")
 
 
 def build_models():
@@ -150,4 +156,33 @@ def train_and_save_best():
     plt.savefig(os.path.join(ARTIFACTS_DIR, "roc_curves.png"), dpi=150)
     plt.close()
 
-    return best_model_name, df_results.to_dict(orient="records")
+    # Cache the metrics
+    metrics_dict = df_results.to_dict(orient="records")
+    try:
+        with open(METRICS_CACHE_PATH, 'w') as f:
+            json.dump(metrics_dict, f)
+    except Exception as e:
+        print(f"Warning: Could not cache metrics: {e}")
+    
+    return best_model_name, metrics_dict
+
+
+def load_cached_metrics():
+    """Load cached metrics from file if available."""
+    if os.path.exists(METRICS_CACHE_PATH):
+        try:
+            with open(METRICS_CACHE_PATH, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Warning: Could not load cached metrics: {e}")
+    return None
+
+
+def get_metrics():
+    """Get metrics, using cache if available, otherwise train models."""
+    cached = load_cached_metrics()
+    if cached:
+        return cached
+    # If no cache, train and return
+    _, metrics = train_and_save_best()
+    return metrics

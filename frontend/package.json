@@ -3,5 +3,13 @@
   "private": true,
   "scripts": {
     "dev": "vite"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.1.2",
+    "axios": "^1.13.2",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "react-router-dom": "^7.10.1",
+    "vite": "^7.2.7"
   }
 }

@@ -14,7 +14,7 @@ from .schemas import (
     MetricItem,
 )
 from .ml.inference import predict_single, predict_batch, get_feature_names, load_model
-from .ml.train import train_and_save_best
+from .ml.train import train_and_save_best, get_metrics
 from .config import ARTIFACTS_DIR
 
 
@@ -78,7 +78,7 @@ async def predict_batch_endpoint(file: UploadFile = File(...)):
 
 @app.get("/models/metrics", response_model=List[MetricItem])
 def models_metrics():
-    _, metrics_list = train_and_save_best()
+    metrics_list = get_metrics()
     return [MetricItem(**m) for m in metrics_list]
 
 

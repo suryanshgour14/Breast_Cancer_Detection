@@ -5,7 +5,7 @@ import numpy as np
 from joblib import load
 from sklearn.datasets import load_breast_cancer
 
-from ...config import MODEL_PATH
+from ..config import MODEL_PATH
 
 _model = None
 _model_lock = threading.Lock()
